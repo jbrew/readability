@@ -4,6 +4,7 @@ import re
 import spacy
 
 cmu = nltk.corpus.cmudict.dict()
+stemmer = nltk.stem.porter.PorterStemmer()
 print(f"{len(cmu)} words in pronouncing dictionary")
 
 def load_nlp():
@@ -15,6 +16,9 @@ def clean(word):
 	word = word.replace('.','')
 	word = word.replace(',','')
 	return word
+
+def stem(word):
+	return stemmer.stem(word)
 
 def words_for_sentence(sentence):
 	words = re.findall(r"[\w']+", sentence)
@@ -39,6 +43,9 @@ def words_for_doc(doc):
 		words.extend(words_for_sentence(sent.text))
 	return words
 
+def words_of_at_least_n_syllables_for_doc(doc, n):
+	return [w for w in words_for_doc(doc) if syllable_count_for_word(w) >= n]
+
 def syllable_count_for_doc(doc):
 	words = words_for_doc(doc)
 	return sum([syllable_count_for_word(word) for word in words])
@@ -55,6 +62,12 @@ def polysyllable_count(doc):
 
 def sentence_count(doc):
 	return len(list(doc.sents))
+
+def avg_sentence_length_for_doc(doc):
+	return wordcount(doc) / sentence_count(doc)
+
+def longest_words_for_doc(doc):
+	return sorted(words_for_doc(doc), key=lambda w: syllable_count_for_word(w), reverse=True)
 
 ## LOADING TEXT
 
